@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: calculator-token
+type: Opaque
+stringData:
+  value: "<TOKEN>"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: calculator-environment
+data:
+  config.service.endpoint: "<ENDPOINT>"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: calculator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: calculator
+  template:
+    metadata:
+      labels:
+        app: calculator
+    spec:
+      containers:
+      - name: calculator
+        image: mcr.microsoft.com/azure-api-management/gateway:beta
+        ports:
+        - name: http
+          containerPort: 8080
+        - name: https
+          containerPort: 8081
+        env:
+        - name: config.service.auth
+          valueFrom:
+            secretKeyRef:
+              name: calculator-token
+              key: value
+        envFrom:
+        - configMapRef:
+            name: calculator-environment
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: calculator
+spec:
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+  - name: https
+    port: 443
+    targetPort: 8081
+  selector:
+    app: calculator

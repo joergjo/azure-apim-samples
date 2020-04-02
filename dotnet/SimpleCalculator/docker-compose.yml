@@ -1,0 +1,17 @@
+version: "3.4"
+
+services:
+  gateway:
+    image: mcr.microsoft.com/azure-api-management/gateway:beta
+    ports:
+      - 8080:8080
+      - 8443:8081
+    environment:
+      - config.service.endpoint=${CFG_ENDPOINT}
+      - config.service.auth=${CFG_AUTH}
+
+  calculator-api:
+    build:
+      context: .
+      dockerfile: SimpleCalculator/Dockerfile
+    image: apim/simplecalculator
