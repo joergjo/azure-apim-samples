@@ -20,13 +20,13 @@ func main() {
 	}
 
 	r := gin.Default()
-	r.POST("/inventory", newAddInventoryItem(db))
+	r.POST("/inventory", newAddInventoryItemHandler(db))
 	r.GET("/inventory", newSearchInventoryHandler(db))
 	addr := fmt.Sprintf(":%d", *port)
 	log.Fatal(r.Run(addr))
 }
 
-func newAddInventoryItem(db *inventory) gin.HandlerFunc {
+func newAddInventoryItemHandler(db *inventory) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var item InventoryItem
 		if err := c.BindJSON(&item); err != nil {
